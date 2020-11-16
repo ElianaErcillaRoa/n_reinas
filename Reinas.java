@@ -1,16 +1,75 @@
 import java.util.Arrays;
 
-public class Reinas {
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import java.awt.*;
+
+public class Reinas extends JFrame {
+
+    private static final long serialVersionUID = 1L;
 
     private int NUM_REINAS;
     private int[] solution;
+    private final static int SIZE = 600;
 
     public Reinas(int NUM_REINAS) {
         this.NUM_REINAS = NUM_REINAS;
         solution = new int[NUM_REINAS];
         init();
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(SIZE, SIZE);
+
+        BorderLayout gestorLayout = new BorderLayout();
+        // GridLayout gestor = new GridLayout(3,3);
+        // setLayout(gestor);
+        setLayout(gestorLayout);
+
+        JButton btn1 = new JButton("norte");
+        JButton btn2 = new JButton("B2");
+        JButton btn3 = new JButton("B3");
+        JButton btn4 = new JButton("B4");
+        JTextField txtnumber = new JTextField(5);
+
+        add(BorderLayout.NORTH, btn1);
+        add(BorderLayout.SOUTH, btn2);
+        add(BorderLayout.CENTER, getBoard());
+        add(BorderLayout.EAST, btn3);
+        add(BorderLayout.WEST, btn4);
+
+        setLocationRelativeTo(this);
+        setVisible(true);
+
         // String strArray = Arrays.toString(solution);
         // System.out.println(strArray);
+    }
+
+    public JPanel getBoard() {
+        JPanel panel = new JPanel();
+        GridLayout gestor = new GridLayout(NUM_REINAS, NUM_REINAS);
+        panel.setLayout(gestor);
+        for (int i = 0; i < NUM_REINAS; i++) {
+            for (int j = 0; j < NUM_REINAS; j++) {
+                JButton cell = new JButton("x");
+                cell.setBackground(Color.WHITE);
+                if ((i + j) % 2 == 0) {
+                    cell.setBackground(Color.GRAY);
+                }
+                cell.setEnabled(false);
+                panel.add(cell);
+            }
+        }
+        return panel;
+    }
+
+    public void getOptions() {
+    }
+
+    public void getResult() {
+
     }
 
     public void init() {
@@ -34,7 +93,7 @@ public class Reinas {
                 boolean valid = isValid(solution, reina);
                 String strSol = Arrays.toString(solucion);
                 System.out.println(strSol + " " + (valid ? "SOL PARCIAL " : "")
-                        + (valid && (reina == NUM_REINAS - 1) ? "SOLUTION" : ""));
+                        + (valid && (reina == NUM_REINAS - 1) ? "SOLUTION COMPLETA" : ""));
                 if (valid) {
                     // reina = reina + 1;
                     success = backtracking(solucion, reina + 1);
@@ -61,7 +120,7 @@ public class Reinas {
     }
 
     public static void main(String[] args) {
-        Reinas reina = new Reinas(4);
+        Reinas reina = new Reinas(7);
         reina.searchSolution();
     }
 }
