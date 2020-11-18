@@ -1,10 +1,15 @@
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.*;
 
 public class Reinas extends JFrame {
@@ -14,6 +19,9 @@ public class Reinas extends JFrame {
     private int NUM_REINAS;
     private int[] solution;
     private final static int SIZE = 600;
+    private JPanel panelBoard;
+    private List<int[]> listSolutions;
+    private JButton[][] btnCells;
 
     public Reinas(int NUM_REINAS) {
         this.NUM_REINAS = NUM_REINAS;
@@ -28,17 +36,12 @@ public class Reinas extends JFrame {
         // setLayout(gestor);
         setLayout(gestorLayout);
 
-        JButton btn1 = new JButton("norte");
-        JButton btn2 = new JButton("B2");
-        JButton btn3 = new JButton("B3");
-        JButton btn4 = new JButton("B4");
-        JTextField txtnumber = new JTextField(5);
+        panelBoard = new JPanel();
+        listSolutions = new LinkedList<>();
 
-        add(BorderLayout.NORTH, btn1);
-        add(BorderLayout.SOUTH, btn2);
+        add(BorderLayout.NORTH, getOptions());
+        add(BorderLayout.SOUTH, getResult());
         add(BorderLayout.CENTER, getBoard());
-        add(BorderLayout.EAST, btn3);
-        add(BorderLayout.WEST, btn4);
 
         setLocationRelativeTo(this);
         setVisible(true);
@@ -48,28 +51,77 @@ public class Reinas extends JFrame {
     }
 
     public JPanel getBoard() {
-        JPanel panel = new JPanel();
+        panelBoard.removeAll();
+        panelBoard.revalidate();
+        panelBoard.repaint();
+        btnCells = new JButton[NUM_REINAS][NUM_REINAS];
         GridLayout gestor = new GridLayout(NUM_REINAS, NUM_REINAS);
-        panel.setLayout(gestor);
+        panelBoard.setLayout(gestor);
         for (int i = 0; i < NUM_REINAS; i++) {
             for (int j = 0; j < NUM_REINAS; j++) {
-                JButton cell = new JButton("x");
-                cell.setBackground(Color.WHITE);
+                JButton cell = new JButton(" ");
                 if ((i + j) % 2 == 0) {
                     cell.setBackground(Color.GRAY);
+                } else {
+                    cell.setBackground(Color.WHITE);
                 }
                 cell.setEnabled(false);
-                panel.add(cell);
+                btnCells[i][j] = cell;
+                panelBoard.add(cell);
             }
         }
-        return panel;
+        panelBoard.revalidate();
+        panelBoard.repaint();
+        return panelBoard;
     }
 
-    public void getOptions() {
+    public JPanel getOptions() {
+        JPanel panelNorth = new JPanel();
+        /*
+         * FlowLayout gestor = new FlowLayout(); panelNorth.setLayout(gestor);
+         */
+        JLabel lbnnumreinas = new JLabel("NUMERO DE REINAS: ");
+        panelNorth.add(lbnnumreinas);
+        JTextField txtNumReinas = new JTextField(10);
+        panelNorth.add(txtNumReinas);
+        JButton btnGo = new JButton("Go");
+
+        btnGo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String strNumReinas = txtNumReinas.getText();
+                NUM_REINAS = Integer.parseInt(strNumReinas);
+                getBoard();
+                
+                searchSolution();
+                paintSolution(listSolutions.get(0));
+            }
+        });
+
+        panelNorth.add(btnGo);
+        return panelNorth;
     }
 
-    public void getResult() {
+    public void paintSolution(int[] s) {
+        for (int i = 0; i < s.length; i++) {
+            btnCells[s[i]][i].setText("X");
+        }
+    }
 
+    public JPanel getResult() {
+        JPanel panelSouth = new JPanel();
+        JLabel lbnmsjcantidad = new JLabel("CANT SOLUCION: ");
+        JLabel lbnCantidad = new JLabel("0");
+
+        JButton btnPreview = new JButton("<<");
+        JLabel lbnNumSolCurrent = new JLabel("0");
+        JButton btnNext = new JButton(">>");
+        panelSouth.add(lbnmsjcantidad);
+        panelSouth.add(lbnCantidad);
+        panelSouth.add(btnPreview);
+        panelSouth.add(lbnNumSolCurrent);
+        panelSouth.add(btnNext);
+        return panelSouth;
     }
 
     public void init() {
@@ -91,12 +143,18 @@ public class Reinas extends JFrame {
                 solucion[reina]++;// [0,-1,-1,-1] // [0,2,-1,-1]
                 // Es para determinar las soluciones parciales
                 boolean valid = isValid(solution, reina);
-                String strSol = Arrays.toString(solucion);
-                System.out.println(strSol + " " + (valid ? "SOL PARCIAL " : "")
-                        + (valid && (reina == NUM_REINAS - 1) ? "SOLUTION COMPLETA" : ""));
+
                 if (valid) {
                     // reina = reina + 1;
                     success = backtracking(solucion, reina + 1);
+                    if (reina == NUM_REINAS - 1) {
+                        String strSol = Arrays.toString(solucion);
+                        System.out.println(strSol);
+                        int[] sClone = solucion.clone();
+                        listSolutions.add(sClone);
+                        // System.out.println(strSol + " " + (valid ? "SOL PARCIAL " : "") + (valid &&
+                        // (reina == NUM_REINAS - 1) ? "SOLUTION COMPLETA" : ""));
+                    }
                 }
             } while (solution[reina] < (NUM_REINAS - 1) && (!success));
             solucion[reina] = -1;
@@ -120,7 +178,7 @@ public class Reinas extends JFrame {
     }
 
     public static void main(String[] args) {
-        Reinas reina = new Reinas(7);
-        reina.searchSolution();
+        Reinas reina = new Reinas(4);
+        // reina.searchSolution();
     }
 }
